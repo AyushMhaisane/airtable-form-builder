@@ -1,6 +1,6 @@
 // client/src/context/AuthContext.jsx
 import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios'; // This uses your configured instance
 
 export const AuthContext = createContext();
 
@@ -12,13 +12,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // We use { withCredentials: true } to send the cookie
-        const res = await axios.get('http://localhost:5000/auth/me', { withCredentials: true });
+        const res = await axios.get('/auth/me'); // Axios handles the base URL automatically
         if (res.data.isAuthenticated) {
           setUser(res.data.user);
         }
       } catch (err) {
-        console.log('Not logged in');
+        // Not logged in, which is fine
       } finally {
         setLoading(false);
       }
@@ -27,8 +26,16 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = () => {
-    // Redirects browser to backend auth route
-    window.location.href = 'http://localhost:5000/auth/airtable';
+    // 1. Get the API URL from the environment (e.g., https://...onrender.com/api)
+    // or fallback to localhost if developing locally
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+    // 2. We need the ROOT URL (remove '/api' from the end)
+    // because the auth route is at /auth, not /api/auth
+    const rootUrl = apiUrl.replace('/api', '');
+
+    // 3. Redirect the browser
+    window.location.href = `${rootUrl}/auth/airtable`;
   };
 
   return (
