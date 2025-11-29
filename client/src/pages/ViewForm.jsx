@@ -1,8 +1,8 @@
-// client/src/pages/ViewForm.jsx
+
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from '../api/axios';
-import { shouldShowQuestion } from '../utils/logicEngine'; // <--- Enabling the Brain 🧠
+import { shouldShowQuestion } from '../utils/logicEngine';
 
 const ViewForm = () => {
   const { id } = useParams();
@@ -11,7 +11,6 @@ const ViewForm = () => {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
-  // --- Styles ---
   const styles = {
     page: { minHeight: '100vh', background: '#121212', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', fontFamily: 'sans-serif' },
     card: { width: '100%', maxWidth: '600px', background: '#1e1e1e', borderRadius: '12px', padding: '2.5rem', boxShadow: '0 8px 30px rgba(0,0,0,0.5)', border: '1px solid #333' },
@@ -51,8 +50,8 @@ const ViewForm = () => {
     }
   };
 
-  if (loading) return <div style={styles.page}><div style={{color:'#888'}}>Loading Form...</div></div>;
-  if (!form) return <div style={styles.page}><div style={{color:'red'}}>Form not found</div></div>;
+  if (loading) return <div style={styles.page}><div style={{ color: '#888' }}>Loading Form...</div></div>;
+  if (!form) return <div style={styles.page}><div style={{ color: 'red' }}>Form not found</div></div>;
 
   if (submitted) {
     return (
@@ -61,7 +60,7 @@ const ViewForm = () => {
           <div style={styles.successCard}>
             <div style={styles.successIcon}>✔</div>
             <h2>Application Received!</h2>
-            <p style={{color: '#aaa', marginTop: '10px'}}>Your response has been saved securely.</p>
+            <p style={{ color: '#aaa', marginTop: '10px' }}>Your response has been saved securely.</p>
           </div>
         </div>
       </div>
@@ -72,15 +71,14 @@ const ViewForm = () => {
     <div style={styles.page}>
       <div style={styles.card}>
         <h1 style={styles.title}>{form.title}</h1>
-        
+
         <form onSubmit={handleSubmit}>
           {form.fields.map(field => {
-            
-            // 🧠 RUN THE LOGIC ENGINE 🧠
-            // This function checks your rules. If it returns FALSE, the field is hidden.
+
+
             const isVisible = shouldShowQuestion(field.conditions, answers);
-            
-            if (!isVisible) return null; // <--- Hides the field
+
+            if (!isVisible) return null;
 
             return (
               <div key={field.airtableFieldId} style={{ marginBottom: '1.5rem', animation: 'fadeIn 0.3s ease-out' }}>
@@ -89,7 +87,7 @@ const ViewForm = () => {
                 </label>
 
                 {(field.type === 'singleLineText' || field.type === 'email' || field.type === 'url') && (
-                  <input 
+                  <input
                     type={field.type === 'email' ? 'email' : 'text'}
                     style={styles.input}
                     onChange={(e) => handleChange(field.airtableFieldId, e.target.value)}
@@ -99,16 +97,16 @@ const ViewForm = () => {
                 )}
 
                 {field.type === 'multilineText' && (
-                  <textarea 
+                  <textarea
                     rows="4"
-                    style={{...styles.input, resize: 'vertical'}}
+                    style={{ ...styles.input, resize: 'vertical' }}
                     onChange={(e) => handleChange(field.airtableFieldId, e.target.value)}
                     required={field.required}
                   />
                 )}
 
                 {(field.type === 'singleSelect' || field.type === 'multipleSelects') && (
-                  <select 
+                  <select
                     style={styles.select}
                     onChange={(e) => handleChange(field.airtableFieldId, e.target.value)}
                     required={field.required}
@@ -123,8 +121,8 @@ const ViewForm = () => {
             );
           })}
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={styles.button}
             onMouseOver={(e) => e.target.style.background = '#1a6cd1'}
             onMouseOut={(e) => e.target.style.background = '#2d7ff9'}

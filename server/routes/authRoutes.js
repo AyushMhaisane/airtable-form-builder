@@ -1,4 +1,3 @@
-// server/routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
 const { loginAirtable, handleCallback, getMe } = require('../controllers/authController');

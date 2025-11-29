@@ -1,4 +1,3 @@
-// server/server.js
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
@@ -7,29 +6,25 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const formRoutes = require('./routes/formRoutes');
 
-// Load env vars
 dotenv.config();
 
-// Connect to Database
 connectDB();
 
 const app = express();
 
-// Middleware
+
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CORS Configuration
 const allowedOrigins = [
-  'http://localhost:5173',            // Vite Localhost
-  'http://localhost:5174',            // Backup Vite port
-  process.env.CLIENT_URL              // Production Frontend URL (Vercel)
+  'http://localhost:5173',           
+  'http://localhost:5174',            
+  process.env.CLIENT_URL              
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) === -1) {
@@ -42,12 +37,11 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
 
-// Basic Route to test server
 app.get('/', (req, res) => {
   res.send('Airtable Form Builder API is running...');
 });
 
-// Import Routes
+
 
 app.use('/api/forms', formRoutes);
 app.use('/auth', authRoutes);

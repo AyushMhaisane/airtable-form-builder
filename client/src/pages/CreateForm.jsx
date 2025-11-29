@@ -1,11 +1,10 @@
-// client/src/pages/CreateForm.jsx
 import { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
 
 const CreateForm = () => {
   const navigate = useNavigate();
-  
+
   const [bases, setBases] = useState([]);
   const [tables, setTables] = useState([]);
   const [availableFields, setAvailableFields] = useState([]);
@@ -14,7 +13,7 @@ const CreateForm = () => {
   const [selectedBase, setSelectedBase] = useState('');
   const [selectedTable, setSelectedTable] = useState('');
   const [formTitle, setFormTitle] = useState('');
-  
+
   const [editingFieldId, setEditingFieldId] = useState(null);
   const [tempCondition, setTempCondition] = useState({
     relatedFieldId: '',
@@ -22,30 +21,30 @@ const CreateForm = () => {
     value: ''
   });
 
-  // Styles Object
+
   const styles = {
     container: { padding: '2rem', maxWidth: '900px', margin: '2rem auto', color: '#eee' },
     header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' },
     label: { display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#ddd' },
     input: { width: '100%', padding: '12px', background: '#333', color: 'white', border: '1px solid #555', borderRadius: '6px', fontSize: '16px' },
     select: { width: '100%', padding: '12px', background: '#333', color: 'white', border: '1px solid #555', borderRadius: '6px', fontSize: '16px' },
-    
-    // THE FIX IS HERE: Explicitly set background to dark gray and text to white
+
+
     fieldContainer: { border: '1px solid #555', borderRadius: '8px', overflow: 'hidden', background: '#222', marginTop: '1rem' },
-    
+
     fieldItem: (enabled) => ({
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'space-between', 
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       padding: '15px',
-      // Enabled = Dark Blue-ish Gray, Disabled = Dark Gray
-      background: enabled ? '#2c3e50' : '#222', 
+
+      background: enabled ? '#2c3e50' : '#222',
       borderBottom: '1px solid #444',
       transition: 'background 0.2s',
-      color: '#fff' // Force text white
+      color: '#fff'
     }),
-    
-    fieldName: { fontSize: '1.1em', color: '#fff', fontWeight: 'bold' }, // Explicit white text
+
+    fieldName: { fontSize: '1.1em', color: '#fff', fontWeight: 'bold' },
     fieldType: { fontSize: '0.9em', color: '#aaa', marginLeft: '10px' },
 
     saveButton: { marginTop: '2rem', padding: '15px 30px', background: '#28a745', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', width: '100%' },
@@ -72,7 +71,7 @@ const CreateForm = () => {
         ...f,
         enabled: false,
         customLabel: f.name,
-        conditions: { logic: 'AND', rules: [] } 
+        conditions: { logic: 'AND', rules: [] }
       }));
       setAvailableFields(fields);
       setLoadingFields(false);
@@ -80,7 +79,7 @@ const CreateForm = () => {
   }, [selectedBase, selectedTable]);
 
   const toggleField = (id) => {
-    setAvailableFields(prev => prev.map(f => 
+    setAvailableFields(prev => prev.map(f =>
       f.id === id ? { ...f, enabled: !f.enabled } : f
     ));
   };
@@ -166,25 +165,25 @@ const CreateForm = () => {
           </div>
 
           <h3 style={{ borderBottom: '1px solid #444', paddingBottom: '10px', marginBottom: '1rem', color: '#fff' }}>4. Configure Fields & Logic</h3>
-          
-          {loadingFields ? <div style={{color: '#aaa'}}>Loading fields...</div> : (
+
+          {loadingFields ? <div style={{ color: '#aaa' }}>Loading fields...</div> : (
             <div style={styles.fieldContainer}>
               {availableFields.map(field => (
                 <div key={field.id} style={styles.fieldItem(field.enabled)}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <input 
-                      type="checkbox" 
-                      checked={field.enabled} 
-                      onChange={() => toggleField(field.id)} 
-                      style={{ marginRight: '15px', transform: 'scale(1.2)', cursor: 'pointer' }} 
+                    <input
+                      type="checkbox"
+                      checked={field.enabled}
+                      onChange={() => toggleField(field.id)}
+                      style={{ marginRight: '15px', transform: 'scale(1.2)', cursor: 'pointer' }}
                     />
                     <div>
-                      {/* Explicit Colors Applied Here */}
+
                       <strong style={styles.fieldName}>{field.name}</strong>
                       <span style={styles.fieldType}>({field.type})</span>
                     </div>
                   </div>
-                  
+
                   {field.enabled && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                       {field.conditions.rules.length > 0 && (
@@ -202,7 +201,7 @@ const CreateForm = () => {
             </div>
           )}
 
-          <button onClick={handleSave} disabled={!formTitle} style={{...styles.saveButton, opacity: !formTitle ? 0.5 : 1, cursor: !formTitle ? 'not-allowed' : 'pointer' }}>
+          <button onClick={handleSave} disabled={!formTitle} style={{ ...styles.saveButton, opacity: !formTitle ? 0.5 : 1, cursor: !formTitle ? 'not-allowed' : 'pointer' }}>
             Save & Create Form
           </button>
         </div>
@@ -215,7 +214,7 @@ const CreateForm = () => {
             <p style={{ marginBottom: '1.5rem', color: '#ccc' }}>
               Show <strong>"{availableFields.find(f => f.id === editingFieldId)?.name}"</strong> ONLY if...
             </p>
-            
+
             <div style={{ marginBottom: '15px' }}>
               <label style={styles.label}>When Field:</label>
               <select style={styles.select} onChange={(e) => setTempCondition({ ...tempCondition, relatedFieldId: e.target.value })}>

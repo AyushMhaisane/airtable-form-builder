@@ -1,10 +1,9 @@
-// server/controllers/authController.js
 const axios = require('axios');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-// --- PKCE Helper Functions ---
+
 function base64URLEncode(str) {
   return str.toString('base64')
     .replace(/\+/g, '-')
@@ -16,14 +15,14 @@ function sha256(buffer) {
   return crypto.createHash('sha256').update(buffer).digest();
 }
 
-// 1. Redirect to Airtable (With PKCE)
+
 exports.loginAirtable = (req, res) => {
-  // A. Generate PKCE Verifier & Challenge
+  
   const verifier = base64URLEncode(crypto.randomBytes(32));
   const challenge = base64URLEncode(sha256(verifier));
 
-  // B. Store Verifier in a short-lived cookie (Needed for step 2)
-  res.cookie('airtable_code_verifier', verifier, { httpOnly: true, maxAge: 60 * 60 * 1000 }); // 1 hour
+ 
+  res.cookie('airtable_code_verifier', verifier, { httpOnly: true, maxAge: 60 * 60 * 1000 });
 
   const scopes = [
     'data.records:read',
@@ -35,25 +34,24 @@ exports.loginAirtable = (req, res) => {
   
   const redirectUri = process.env.AIRTABLE_REDIRECT_URI;
   const clientId = process.env.AIRTABLE_CLIENT_ID;
-  const state = 'random_state_123'; // In prod, make this random
+  const state = 'random_state_123'; 
 
-  // C. Build URL with PKCE params
   const url = `https://airtable.com/oauth2/v1/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scopes}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256`;
   
   res.redirect(url);
 };
 
-// 2. Handle the Callback
+
 exports.handleCallback = async (req, res) => {
   const { code, error } = req.query;
-  const verifier = req.cookies.airtable_code_verifier; // Retrieve the secret
+  const verifier = req.cookies.airtable_code_verifier; 
 
   if (error) return res.status(400).json({ error: `Airtable Error: ${error}` });
   if (!code) return res.status(400).json({ error: 'Authorization code missing' });
   if (!verifier) return res.status(400).json({ error: 'PKCE Verifier missing (Cookie expired?)' });
 
   try {
-    // A. Exchange Code for Tokens (Include code_verifier)
+   
     const credentials = Buffer.from(
       `${process.env.AIRTABLE_CLIENT_ID}:${process.env.AIRTABLE_CLIENT_SECRET}`
     ).toString('base64');
@@ -76,7 +74,7 @@ exports.handleCallback = async (req, res) => {
 
     const { access_token, refresh_token, expires_in } = tokenResponse.data;
 
-    // B. Get User Identity
+ 
     const userResponse = await axios.get('https://api.airtable.com/v0/meta/whoami', {
       headers: { Authorization: `Bearer ${access_token}` },
     });
@@ -84,7 +82,7 @@ exports.handleCallback = async (req, res) => {
     const airtableUserId = userResponse.data.id;
     const email = userResponse.data.email;
 
-    // C. Save/Update User
+
     const tokenExpiresAt = new Date(Date.now() + expires_in * 1000);
 
     let user = await User.findOne({ airtableUserId });
@@ -104,14 +102,13 @@ exports.handleCallback = async (req, res) => {
       });
     }
 
-    // D. Issue App Token
+    
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     
     // Cleanup temporary cookie
     res.clearCookie('airtable_code_verifier');
 
-    // ✅ NEW STRATEGY: Redirect to Frontend with Token in URL
-    // This bypasses cross-site cookie blocking entirely.
+    
     res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`);
 
   } catch (error) {
@@ -123,16 +120,16 @@ exports.handleCallback = async (req, res) => {
   }
 };
 
-// 3. Get Current User
+
 exports.getMe = async (req, res) => {
   try {
-    // Check Authorization Header (Bearer Token)
+    
     let token;
     
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     } 
-    // Fallback to cookie (for localhost/testing)
+ 
     else if (req.cookies.token) {
       token = req.cookies.token;
     }

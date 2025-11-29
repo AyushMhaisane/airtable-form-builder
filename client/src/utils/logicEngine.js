@@ -1,7 +1,5 @@
-// client/src/utils/logicEngine.js
 
 export const shouldShowQuestion = (conditions, currentAnswers) => {
-  // Safety check: If no rules exist, show the question
   if (!conditions || !conditions.rules || conditions.rules.length === 0) {
     return true;
   }
@@ -14,7 +12,6 @@ export const shouldShowQuestion = (conditions, currentAnswers) => {
 
     if (userAnswer === undefined || userAnswer === null) return false;
 
-    // Convert everything to lowercase strings for safe comparison
     const safeUser = userAnswer.toString().toLowerCase();
     const safeTarget = targetValue.toString().toLowerCase();
 

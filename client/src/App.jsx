@@ -4,14 +4,11 @@ import { AuthProvider, AuthContext } from './context/AuthContext';
 import { useContext } from 'react';
 import FormResponses from './pages/FormResponses';
 import AuthSuccess from './pages/AuthSuccess';
-
-// Import Pages
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import CreateForm from './pages/CreateForm';
 import ViewForm from './pages/ViewForm';
 
-// Protected Route Wrapper
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
   if (loading) return <div>Loading...</div>;
@@ -23,14 +20,14 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+
           
-          {/* Public Route: Login */}
           <Route path="/" element={<Login />} />
 
-          {/* Public Route: View Form (No login required) */}
+         
           <Route path="/form/:id" element={<ViewForm />} />
 
-          {/* Protected Routes */}
+         
           <Route
             path="/dashboard"
             element={
@@ -58,7 +55,7 @@ function App() {
             }
           />
 
-          {/* Catch-all */}
+        
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>

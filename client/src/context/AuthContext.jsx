@@ -1,4 +1,3 @@
-// client/src/context/AuthContext.jsx
 import { createContext, useState, useEffect } from 'react';
 import axios from '../api/axios';
 
@@ -6,10 +5,9 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token')); // Load from storage
+  const [token, setToken] = useState(localStorage.getItem('token')); 
   const [loading, setLoading] = useState(true);
 
-  // When token changes, fetch user details
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
