@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import { useContext } from 'react';
 import FormResponses from './pages/FormResponses';
+import AuthSuccess from './pages/AuthSuccess';
 
 // Import Pages
 import Login from './pages/Login';
@@ -22,6 +23,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          
           {/* Public Route: Login */}
           <Route path="/" element={<Login />} />
 
@@ -37,7 +39,7 @@ function App() {
               </PrivateRoute>
             }
           />
-
+          <Route path="/auth-success" element={<AuthSuccess />} />
           <Route
             path="/responses/:formId"
             element={

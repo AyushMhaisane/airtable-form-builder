@@ -64,7 +64,7 @@ exports.handleCallback = async (req, res) => {
         code,
         redirect_uri: process.env.AIRTABLE_REDIRECT_URI,
         grant_type: 'authorization_code',
-        code_verifier: verifier // <--- CRITICAL: Proves we are the same app
+        code_verifier: verifier 
       }),
       {
         headers: {
@@ -105,26 +105,14 @@ exports.handleCallback = async (req, res) => {
     }
 
     // D. Issue App Token
-    // ... inside handleCallback ...
-
-    // D. Issue App Token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     
     // Cleanup temporary cookie
     res.clearCookie('airtable_code_verifier');
 
-    // Set real auth cookie (UPDATED FOR PRODUCTION)
-    res.cookie('token', token, {
-      httpOnly: true,
-      // "secure: true" is REQUIRED for SameSite=None
-      secure: true, 
-      // "SameSite: none" is REQUIRED for Cross-Domain (Vercel -> Render)
-      sameSite: 'none', 
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    // Redirect to the Frontend Dashboard
-    res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+    // ✅ NEW STRATEGY: Redirect to Frontend with Token in URL
+    // This bypasses cross-site cookie blocking entirely.
+    res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`);
 
   } catch (error) {
     console.error('OAuth Error:', error.response?.data || error.message);
@@ -138,7 +126,17 @@ exports.handleCallback = async (req, res) => {
 // 3. Get Current User
 exports.getMe = async (req, res) => {
   try {
-    const token = req.cookies.token;
+    // Check Authorization Header (Bearer Token)
+    let token;
+    
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    } 
+    // Fallback to cookie (for localhost/testing)
+    else if (req.cookies.token) {
+      token = req.cookies.token;
+    }
+
     if (!token) return res.status(401).json({ isAuthenticated: false });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

@@ -1,45 +1,44 @@
 // client/src/context/AuthContext.jsx
 import { createContext, useState, useEffect } from 'react';
-import axios from '../api/axios'; // This uses your configured instance
+import axios from '../api/axios';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token')); // Load from storage
   const [loading, setLoading] = useState(true);
 
-  // Check if user is logged in on page load
+  // When token changes, fetch user details
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await axios.get('/auth/me'); // Axios handles the base URL automatically
-        if (res.data.isAuthenticated) {
-          setUser(res.data.user);
-        }
-      } catch (err) {
-        // Not logged in, which is fine
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAuth();
-  }, []);
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      axios.get('/auth/me')
+        .then(res => setUser(res.data.user))
+        .catch(() => {
+          localStorage.removeItem('token');
+          setToken(null);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [token]);
 
   const login = () => {
-    // 1. Get the API URL from the environment (e.g., https://...onrender.com/api)
-    // or fallback to localhost if developing locally
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-    // 2. We need the ROOT URL (remove '/api' from the end)
-    // because the auth route is at /auth, not /api/auth
     const rootUrl = apiUrl.replace('/api', '');
-
-    // 3. Redirect the browser
     window.location.href = `${rootUrl}/auth/airtable`;
   };
 
+  const logout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, setToken }}>
       {children}
     </AuthContext.Provider>
   );
