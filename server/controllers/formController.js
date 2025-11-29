@@ -61,7 +61,9 @@ exports.getFields = async (req, res) => {
       'multilineText', 
       'singleSelect', 
       'multipleSelects', 
-      'multipleAttachments' // Files
+      'multipleAttachments',
+      'email',
+      'url'
     ];
 
     const fields = table.fields.filter(f => supportedTypes.includes(f.type));
