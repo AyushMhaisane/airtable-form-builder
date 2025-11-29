@@ -13,13 +13,13 @@ A full-stack SaaS application that allows users to create **dynamic, logic-drive
 
 ## 📸 Screenshots
 
-| Admin Dashboard | Logic Builder |
+| Admin Dashboard | Create New Form |
 | :---: | :---: |
-| ![Dashboard](https://placehold.co/600x400/2d2d2d/FFF?text=Admin+Dashboard) | ![Builder](https://placehold.co/600x400/2d2d2d/FFF?text=Logic+Configuration) |
+| ![Admin Dashboard](./screenshots/admin.png) | ![Create New Form](./screenshots/newform.png) |
 
-| Hidden Field | Visible by Logic |
+| Add Logic | Visible by Logic |
 | :---: | :---: |
-| ![Hidden](https://placehold.co/600x400/2d2d2d/FFF?text=Field+Hidden) | ![Visible](https://placehold.co/600x400/2d2d2d/FFF?text=Field+Revealed) |
+| ![Create New Form](./screenshots/addlogic.png) | ![Visible](./screenshots/logic.png) |
 
 ---
 
