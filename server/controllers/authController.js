@@ -105,18 +105,25 @@ exports.handleCallback = async (req, res) => {
     }
 
     // D. Issue App Token
+    // ... inside handleCallback ...
+
+    // D. Issue App Token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     
     // Cleanup temporary cookie
     res.clearCookie('airtable_code_verifier');
 
-    // Set real auth cookie
+    // Set real auth cookie (UPDATED FOR PRODUCTION)
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      // "secure: true" is REQUIRED for SameSite=None
+      secure: true, 
+      // "SameSite: none" is REQUIRED for Cross-Domain (Vercel -> Render)
+      sameSite: 'none', 
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // Redirect to the Frontend Dashboard
     res.redirect(`${process.env.CLIENT_URL}/dashboard`);
 
   } catch (error) {
