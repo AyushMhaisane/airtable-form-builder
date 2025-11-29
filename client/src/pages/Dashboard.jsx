@@ -8,70 +8,95 @@ const Dashboard = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [forms, setForms] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // --- Dark Mode Styles ---
+  const styles = {
+    page: { minHeight: '100vh', background: '#1a1a1a', color: '#eee', padding: '2rem' },
+    container: { maxWidth: '1200px', margin: '0 auto' },
+    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', borderBottom: '1px solid #333', paddingBottom: '20px' },
+    title: { fontSize: '2.5rem', fontWeight: 'bold', margin: 0, background: 'linear-gradient(90deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
+    createButton: { padding: '12px 24px', background: '#2d7ff9', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1rem', fontWeight: '600', transition: 'transform 0.2s', boxShadow: '0 4px 14px rgba(45, 127, 249, 0.3)' },
+    
+    grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' },
+    
+    card: { background: '#2d2d2d', border: '1px solid #444', borderRadius: '12px', padding: '2rem', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s, box-shadow 0.2s' },
+    cardTitle: { margin: '0 0 10px 0', fontSize: '1.4rem', color: '#fff' },
+    cardMeta: { color: '#888', fontSize: '0.9rem', marginBottom: '2rem', fontFamily: 'monospace', background: '#222', padding: '5px 10px', borderRadius: '4px', display: 'inline-block' },
+    
+    buttonGroup: { marginTop: 'auto', display: 'flex', gap: '15px' },
+    linkBtn: { textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', padding: '8px 16px', borderRadius: '6px', border: '1px solid transparent', transition: 'all 0.2s' },
+    publicLink: { color: '#63b3ed', border: '1px solid #3182ce', background: 'rgba(49, 130, 206, 0.1)' },
+    responsesLink: { color: '#68d391', border: '1px solid #38a169', background: 'rgba(56, 161, 105, 0.1)' }
+  };
 
   useEffect(() => {
-    // Fetch user's forms
-    axios.get('/forms/my-forms')
-      .then(res => setForms(res.data))
-      .catch(err => console.error("Failed to fetch forms", err));
+    axios.get('/forms/my-forms') 
+      .then(res => {
+        setForms(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch forms", err);
+        setLoading(false);
+      });
   }, []);
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1>My Forms</h1>
-        <button
-          onClick={() => navigate('/create')}
-          style={{ padding: '10px 20px', background: '#2d7ff9', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          + Create New Form
-        </button>
-      </div>
-
-      {forms.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem', border: '2px dashed #ccc', borderRadius: '8px', color: '#666' }}>
-          <h3>No forms yet</h3>
-          <p>Create your first form to get started!</p>
+    <div style={styles.page}>
+      <div style={styles.container}>
+        {/* Header Section */}
+        <div style={styles.header}>
+          <h1 style={styles.title}>My Forms</h1>
+          <button 
+            onClick={() => navigate('/create')}
+            style={styles.createButton}
+            onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+            onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+          >
+            + Create New Form
+          </button>
         </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-          {forms.map(form => (
-            <div key={form._id} style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '1.5rem', background: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ margin: '0 0 10px 0' }}>{form.title}</h3>
-              <p style={{ color: '#666', fontSize: '0.9em' }}>Base ID: {form.airtableBaseId}</p>
 
-              {/* Buttons Container */}
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
+        {/* Content Section */}
+        {loading ? (
+          <div style={{color: '#666', textAlign: 'center'}}>Loading your workspace...</div>
+        ) : forms.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '5rem', border: '2px dashed #444', borderRadius: '12px', background: '#252525' }}>
+            <h3 style={{color: '#fff'}}>No forms yet</h3>
+            <p style={{color: '#888'}}>Create your first form to start collecting data.</p>
+          </div>
+        ) : (
+          <div style={styles.grid}>
+            {forms.map(form => (
+              <div key={form._id} style={styles.card}>
+                {/* Fallback for missing titles */}
+                <h3 style={styles.cardTitle}>{form.title || "Untitled Test Form"}</h3>
+                
+                <div>
+                  <span style={styles.cardMeta}>Base: {form.airtableBaseId.substring(0, 10)}...</span>
+                </div>
 
-                {/* 1. Public Link Button */}
-                <Link
-                  to={`/form/${form._id}`}
-                  style={{ textDecoration: 'none', color: '#2d7ff9', fontWeight: 'bold' }}
-                >
-                  View Public Link →
-                </Link>
+                <div style={styles.buttonGroup}>
+                  <Link 
+                    to={`/form/${form._id}`} 
+                    style={{...styles.linkBtn, ...styles.publicLink}}
+                  >
+                    View Form ↗
+                  </Link>
 
-                {/* 2. Admin View Responses Button (NEW) */}
-                <Link
-                  to={`/responses/${form._id}`}
-                  style={{
-                    textDecoration: 'none',
-                    color: '#28a745',
-                    fontWeight: 'bold',
-                    fontSize: '0.9em',
-                    border: '1px solid #28a745',
-                    padding: '6px 12px',
-                    borderRadius: '4px'
-                  }}
-                >
-                  View Responses
-                </Link>
-
+                  <Link 
+                    to={`/responses/${form._id}`}
+                    style={{...styles.linkBtn, ...styles.responsesLink}}
+                  >
+                    Responses
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
