@@ -10,24 +10,27 @@ const Dashboard = () => {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- Dark Mode Styles ---
+  // --- Styles ---
   const styles = {
     page: { minHeight: '100vh', background: '#1a1a1a', color: '#eee', padding: '2rem' },
     container: { maxWidth: '1200px', margin: '0 auto' },
     header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', borderBottom: '1px solid #333', paddingBottom: '20px' },
     title: { fontSize: '2.5rem', fontWeight: 'bold', margin: 0, background: 'linear-gradient(90deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
-    createButton: { padding: '12px 24px', background: '#2d7ff9', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1rem', fontWeight: '600', transition: 'transform 0.2s', boxShadow: '0 4px 14px rgba(45, 127, 249, 0.3)' },
+    createButton: { padding: '12px 24px', background: '#2d7ff9', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1rem', fontWeight: '600', boxShadow: '0 4px 14px rgba(45, 127, 249, 0.3)' },
     
     grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' },
     
-    card: { background: '#2d2d2d', border: '1px solid #444', borderRadius: '12px', padding: '2rem', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s, box-shadow 0.2s' },
+    card: { background: '#2d2d2d', border: '1px solid #444', borderRadius: '12px', padding: '2rem', display: 'flex', flexDirection: 'column' },
     cardTitle: { margin: '0 0 10px 0', fontSize: '1.4rem', color: '#fff' },
     cardMeta: { color: '#888', fontSize: '0.9rem', marginBottom: '2rem', fontFamily: 'monospace', background: '#222', padding: '5px 10px', borderRadius: '4px', display: 'inline-block' },
     
-    buttonGroup: { marginTop: 'auto', display: 'flex', gap: '15px' },
-    linkBtn: { textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', padding: '8px 16px', borderRadius: '6px', border: '1px solid transparent', transition: 'all 0.2s' },
-    publicLink: { color: '#63b3ed', border: '1px solid #3182ce', background: 'rgba(49, 130, 206, 0.1)' },
-    responsesLink: { color: '#68d391', border: '1px solid #38a169', background: 'rgba(56, 161, 105, 0.1)' }
+    buttonGroup: { marginTop: 'auto', display: 'flex', gap: '10px', flexWrap: 'wrap' },
+    btn: { textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', padding: '8px 14px', borderRadius: '6px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    
+    // Button Colors
+    viewBtn: { color: '#63b3ed', background: 'rgba(49, 130, 206, 0.15)', border: '1px solid #3182ce' },
+    responseBtn: { color: '#68d391', background: 'rgba(56, 161, 105, 0.15)', border: '1px solid #38a169' },
+    shareBtn: { color: '#f6e05e', background: 'rgba(236, 201, 75, 0.15)', border: '1px solid #d69e2e' }
   };
 
   useEffect(() => {
@@ -42,25 +45,26 @@ const Dashboard = () => {
       });
   }, []);
 
+  // NEW: Function to copy link
+  const handleCopyLink = (formId) => {
+    // Construct the public URL dynamically
+    const publicUrl = `${window.location.origin}/form/${formId}`;
+    
+    navigator.clipboard.writeText(publicUrl).then(() => {
+      alert("✅ Link copied to clipboard!\n\nSend this to anyone to fill out the form.");
+    });
+  };
+
   return (
     <div style={styles.page}>
       <div style={styles.container}>
-        {/* Header Section */}
         <div style={styles.header}>
           <h1 style={styles.title}>My Forms</h1>
-          <button 
-            onClick={() => navigate('/create')}
-            style={styles.createButton}
-            onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
-            onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
-          >
-            + Create New Form
-          </button>
+          <button onClick={() => navigate('/create')} style={styles.createButton}>+ Create New Form</button>
         </div>
 
-        {/* Content Section */}
         {loading ? (
-          <div style={{color: '#666', textAlign: 'center'}}>Loading your workspace...</div>
+          <div style={{color: '#666', textAlign: 'center'}}>Loading workspace...</div>
         ) : forms.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem', border: '2px dashed #444', borderRadius: '12px', background: '#252525' }}>
             <h3 style={{color: '#fff'}}>No forms yet</h3>
@@ -70,27 +74,28 @@ const Dashboard = () => {
           <div style={styles.grid}>
             {forms.map(form => (
               <div key={form._id} style={styles.card}>
-                {/* Fallback for missing titles */}
-                <h3 style={styles.cardTitle}>{form.title || "Untitled Test Form"}</h3>
-                
-                <div>
-                  <span style={styles.cardMeta}>Base: {form.airtableBaseId.substring(0, 10)}...</span>
-                </div>
+                <h3 style={styles.cardTitle}>{form.title || "Untitled Form"}</h3>
+                <div><span style={styles.cardMeta}>Base: {form.airtableBaseId.substring(0, 8)}...</span></div>
 
                 <div style={styles.buttonGroup}>
-                  <Link 
-                    to={`/form/${form._id}`} 
-                    style={{...styles.linkBtn, ...styles.publicLink}}
-                  >
-                    View Form ↗
+                  {/* 1. View Button */}
+                  <Link to={`/form/${form._id}`} style={{...styles.btn, ...styles.viewBtn}}>
+                    👁️ View
                   </Link>
 
-                  <Link 
-                    to={`/responses/${form._id}`}
-                    style={{...styles.linkBtn, ...styles.responsesLink}}
-                  >
-                    Responses
+                  {/* 2. Responses Button */}
+                  <Link to={`/responses/${form._id}`} style={{...styles.btn, ...styles.responseBtn}}>
+                    📊 Data
                   </Link>
+                  
+                  {/* 3. NEW: Share Button */}
+                  <button 
+                    onClick={() => handleCopyLink(form._id)}
+                    style={{...styles.btn, ...styles.shareBtn}}
+                    title="Copy Link to Clipboard"
+                  >
+                    🔗 Share
+                  </button>
                 </div>
               </div>
             ))}
